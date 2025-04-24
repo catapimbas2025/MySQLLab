@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Configuration;
 using System.Data;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 
 namespace MySQLLab.Dados
@@ -79,36 +80,34 @@ namespace MySQLLab.Dados
 
         //}
 
-        public void Update(int id, string nome, string email, string senha)
+        public bool Update(int id, string nome, string email, string senha)
         {
             try
             {
-             MySqlConnection mySqlConnection = DBConnection.GetConnection();
-             using MySqlConnection conn = mySqlConnection;
-            {
-             conn.Open();
-             string query = "UPDATE tblusuarios SET nome = @nome, email = @email, senha = @senha WHERE id = @id";
-             MySqlCommand cmd = new MySqlCommand(query, conn);
-             cmd.Parameters.AddWithValue("@id", id);
-             cmd.Parameters.AddWithValue("@nome", nome);
-             cmd.Parameters.AddWithValue("@email", email);
-             cmd.Parameters.AddWithValue("@senha", senha);
+                using (MySqlConnection conn = DBConnection.GetConnection())
+                {
+                    conn.Open();
+                    string query = "UPDATE tblusuarios SET nome = @nome, email = @email, senha = @senha WHERE id = @id";
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@nome", nome);
+                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@senha", senha);
 
-             cmd.ExecuteNonQuery();
-             conn.Close();
+                    // Verifica quantas linhas foram afetadas
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    return rowsAffected > 0; // Retorna true se pelo menos uma linha foi atualizada
+                }
             }
-            }
-             catch (Exception ex)
+            catch (Exception ex)
             {
-
-             string Erro = ex.Message.ToString().Trim();
-            }
-             finally
-            {
-
-
+                // Log ou tratamento de erro
+                Console.WriteLine("Erro ao atualizar: " + ex.Message);
+                return false;
             }
         }
+
+        
         public void Delete(int id)
         {
             try
@@ -130,14 +129,14 @@ namespace MySQLLab.Dados
 
              string Erro = ex.Message.ToString().Trim();
             }
-             finally
+            finally
             {
-
-
             }
 
 
         }
+        
+        
     }
     
 }
